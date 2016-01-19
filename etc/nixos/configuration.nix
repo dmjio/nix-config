@@ -12,56 +12,58 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_4_3;
-  boot.kernelParams = [
-    # https://help.ubuntu.com/community/AppleKeyboard
-    # https://wiki.archlinux.org/index.php/Apple_Keyboard
-    "hid_apple.fnmode=1"
-    "hid_apple.iso_layout=0"
-    "hid_apple.swap_opt_cmd=1"
-  ];
-
-
-  boot.extraModprobeConfig = ''
-   options libata.force=noncq
-   options resume=/dev/sda5
-   options snd_hda_intel index=0 model=intel-mac-auto id=PCH
-   options snd_hda_intel index=1 model=intel-mac-auto id=HDMI
-  '';
+  boot = { 
+     kernelPackages = pkgs.linuxPackages_4_3;
+     kernelParams = [
+      # https://help.ubuntu.com/community/AppleKeyboard
+      # https://wiki.archlinux.org/index.php/Apple_Keyboard
+      "hid_apple.fnmode=1"
+      "hid_apple.iso_layout=0"
+      "hid_apple.swap_opt_cmd=1"
+      ];
+    loader = { 
+      gummiboot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    extraModprobeConfig = ''
+      options libata.force=noncq
+      options resume=/dev/sda5
+      options snd_hda_intel index=0 model=intel-mac-auto id=PCH
+      options snd_hda_intel index=1 model=intel-mac-auto id=HDMI
+     '';
+  };
   
-  # Use the gummiboot efi boot loader.
-  boot.loader.gummiboot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  networking.hostName = "nixos"; # Define your hostname.
-  networking.networkmanager.enable = true;  
-  networking.interfaceMonitor.enable = true;
+  networking = { 
+     hostName = "nixos"; # Define your hostname.
+     networkmanager.enable = true;  
+     interfaceMonitor.enable = true;
+  };
 
   # fonts
   fonts = {
     enableFontDir = true;
     enableCoreFonts = true;
     enableGhostscriptFonts = true;
+    fonts = with pkgs; [
+      corefonts
+      inconsolata
+      liberation_ttf
+      dejavu_fonts
+      bakoma_ttf
+      gentium
+      ubuntu_font_family
+      terminus_font
+    ];
   };
 
-   fonts.fonts = with pkgs; [
-    corefonts
-    inconsolata
-    liberation_ttf
-    dejavu_fonts
-    bakoma_ttf
-    gentium
-    ubuntu_font_family
-    terminus_font
-  ];
-
-  nix.useChroot = true;
-  nix.trustedBinaryCaches = [ http://hydra.nixos.org ];
-  nix.binaryCaches =
-    [
+  nix = { 
+    useChroot = true;
+    trustedBinaryCaches = [ http://hydra.nixos.org ];
+    binaryCaches = [
       http://cache.nixos.org
       http://hydra.nixos.org
     ];
+  };
 
   # Select internationalisation properties.
    i18n = {
@@ -88,40 +90,37 @@
      nmap
    ];
 
-  # List services that you want to enable:
-
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
   # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  services.printing.enable = true;
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.autorun = false;
-  services.xserver.xkbVariant = "mac";
-  services.xserver.xkbOptions = "terminate:ctrl_alt_bksp, ctrl:nocaps";
-  services.xserver.videoDrivers = [ "nvidia" ];
-  services.xserver.vaapiDrivers = [ pkgs.vaapiIntel ];
+  services.xserver = { 
+     enable = true;
+     autorun = false;
+     xkbVariant = "mac";
+     xkbOptions = "terminate:ctrl_alt_bksp, ctrl:nocaps";
+     videoDrivers = [ "nvidia" ];
+     layout = "us";
+     vaapiDrivers = [ pkgs.vaapiIntel ];
+     multitouch.enable = true;
+     synaptics = {
+       enable = true;
+       tapButtons = true;
+       fingersMap = [ 0 0 0 ];
+       buttonsMap = [ 1 3 2 ];
+       twoFingerScroll = true;
+    };
+    displayManager.gdm.enable = true;
+    desktopManager.gnome3.enable = true;
+  };
+  
   hardware.opengl.driSupport32Bit = true;
 
   powerManagement.enable = true;
   programs.light.enable = true;
-
-  services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
-  services.xserver.multitouch.enable = true;
-  services.xserver.synaptics = {
-    enable = true;
-    tapButtons = true;
-    fingersMap = [ 0 0 0 ];
-    buttonsMap = [ 1 3 2 ];
-    twoFingerScroll = true;
-  };
-
-  # Enable the KDE Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome3.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.extraUsers.dmj = {
@@ -136,7 +135,9 @@
   # The NixOS release to be compatible with for stateful data such as databases.
   system.stateVersion = "15.09";
 
-  services.postgresql.enable = true;
-  services.postgresql.package = pkgs.postgresql94;
-  services.postgresql.authentication = "local all all ident";
+  services.postgresql = { 
+    enable = true;
+    package = pkgs.postgresql94;
+    authentication = "local all all ident";
+  };
 }
