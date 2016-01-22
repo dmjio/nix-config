@@ -78,7 +78,37 @@
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
-     emacs
+     emacs = pkgs.emacsWithPackages
+      (epkgs: with epkgs; [
+        ace-jump-mode
+        auctex
+        company
+        company-ghc
+        diminish
+        evil
+        evil-indent-textobject
+        evil-leader
+        evil-surround
+        flycheck
+        ghc
+        git-auto-commit-mode
+        git-timemachine
+        haskell-mode
+        helm
+        idris-mode
+        ido-ubiquitos
+        ido-vertical-mode
+        pkgs.ledger
+        magit
+        markdown-mode
+        monokai-theme
+        org-plus-contrib
+        rainbow-delimiters
+        smex
+        undo-tree
+        use-package
+        yasnippet
+      ])
      chromium
      ghc
      skype
