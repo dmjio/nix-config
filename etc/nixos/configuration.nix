@@ -12,7 +12,7 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  boot = { 
+  boot = {
      kernelPackages = pkgs.linuxPackages_4_3;
      kernelParams = [
       # https://help.ubuntu.com/community/AppleKeyboard
@@ -21,7 +21,7 @@
       "hid_apple.iso_layout=0"
       "hid_apple.swap_opt_cmd=1"
       ];
-    loader = { 
+    loader = {
       gummiboot.enable = true;
       efi.canTouchEfiVariables = true;
     };
@@ -32,10 +32,10 @@
       options snd_hda_intel index=1 model=intel-mac-auto id=HDMI
      '';
   };
-  
-  networking = { 
+
+  networking = {
      hostName = "nixos"; # Define your hostname.
-     networkmanager.enable = true;  
+     networkmanager.enable = true;
      interfaceMonitor.enable = true;
   };
 
@@ -56,7 +56,7 @@
     ];
   };
 
-  nix = { 
+  nix = {
     useChroot = true;
     trustedBinaryCaches = [ http://hydra.nixos.org ];
     binaryCaches = [
@@ -77,38 +77,37 @@
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
-  environment.systemPackages = with pkgs; [
-     emacs = pkgs.emacsWithPackages
+
+  emacspkgs = pkgs.emacsWithPackages
       (epkgs: with epkgs; [
-        ace-jump-mode
-        auctex
-        company
-        company-ghc
-        diminish
-        evil
-        evil-indent-textobject
-        evil-leader
-        evil-surround
-        flycheck
-        ghc
-        git-auto-commit-mode
-        git-timemachine
-        haskell-mode
-        helm
-        idris-mode
-        ido-ubiquitos
-        ido-vertical-mode
-        pkgs.ledger
-        magit
-        markdown-mode
-        monokai-theme
-        org-plus-contrib
-        rainbow-delimiters
-        smex
-        undo-tree
-        use-package
-        yasnippet
-      ])
+	ace-jump-mode
+	auctex
+	company
+	company-ghc
+	diminish
+	flycheck
+	ghc
+	git-auto-commit-mode
+	git-timemachine
+	haskell-mode
+	helm
+	idris-mode
+	ido-ubiquitos
+	ido-vertical-mode
+	pkgs.ledger
+	magit
+	markdown-mode
+	monokai-theme
+	org-plus-contrib
+	rainbow-delimiters
+	smex
+	undo-tree
+	use-package
+	yasnippet
+      ]);
+
+  environment.systemPackages = with pkgs; [
+     emacspkgs
      chromium
      ghc
      skype
@@ -127,7 +126,7 @@
   services.printing.enable = true;
 
   # Enable the X11 windowing system.
-  services.xserver = { 
+  services.xserver = {
      enable = true;
      autorun = false;
      xkbVariant = "mac";
@@ -146,7 +145,7 @@
     displayManager.gdm.enable = true;
     desktopManager.gnome3.enable = true;
   };
-  
+
   # custom setup for emacs, use emacsclient
   systemd.user.services.emacs = {
     description = "Emacs: the extensible, self-documenting text editor";
@@ -156,26 +155,26 @@
       ExecStop  = "${pkgs.emacs}/bin/emacsclient --eval (kill-emacs)";
       Restart   = "always";
     };
-    
+
     #emacs overrides
     packageOverrides = pkgs: {
-        # Define my own Emacs
-        emacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
-            # Use gtk3 instead of the default gtk2
-            gtk = pkgs.gtk3;
-            # Make sure imagemgick is a dependency because I regularly
-            # look at pictures from Emasc
-            imagemagick = pkgs.imagemagickBig;
-          }) (attrs: {
-            # I don't want emacs.desktop file because I only use
-            # emacsclient.
-            postInstall = attrs.postInstall + ''
-              rm $out/share/applications/emacs.desktop
-            '';
-        });
+	# Define my own Emacs
+	emacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
+	    # Use gtk3 instead of the default gtk2
+	    gtk = pkgs.gtk3;
+	    # Make sure imagemgick is a dependency because I regularly
+	    # look at pictures from Emasc
+	    imagemagick = pkgs.imagemagickBig;
+	  }) (attrs: {
+	    # I don't want emacs.desktop file because I only use
+	    # emacsclient.
+	    postInstall = attrs.postInstall + ''
+	      rm $out/share/applications/emacs.desktop
+	    '';
+	});
 
     };
-  
+
   hardware.opengl.driSupport32Bit = true;
 
   powerManagement.enable = true;
@@ -194,7 +193,7 @@
   # The NixOS release to be compatible with for stateful data such as databases.
   system.stateVersion = "15.09";
 
-  services.postgresql = { 
+  services.postgresql = {
     enable = true;
     package = pkgs.postgresql94;
     authentication = "local all all ident";
