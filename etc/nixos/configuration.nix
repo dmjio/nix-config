@@ -117,6 +117,35 @@
     desktopManager.gnome3.enable = true;
   };
   
+  # custom setup for emacs, use emacsclient
+  systemd.user.services.emacs = {
+    description = "Emacs: the extensible, self-documenting text editor";
+    serviceConfig = {
+      Type      = "forking";
+      ExecStart = "${pkgs.emacs}/bin/emacs --daemon";
+      ExecStop  = "${pkgs.emacs}/bin/emacsclient --eval (kill-emacs)";
+      Restart   = "always";
+    };
+    
+    #emacs overrides
+    packageOverrides = pkgs: {
+        # Define my own Emacs
+        emacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
+            # Use gtk3 instead of the default gtk2
+            gtk = pkgs.gtk3;
+            # Make sure imagemgick is a dependency because I regularly
+            # look at pictures from Emasc
+            imagemagick = pkgs.imagemagickBig;
+          }) (attrs: {
+            # I don't want emacs.desktop file because I only use
+            # emacsclient.
+            postInstall = attrs.postInstall + ''
+              rm $out/share/applications/emacs.desktop
+            '';
+        });
+
+    };
+  
   hardware.opengl.driSupport32Bit = true;
 
   powerManagement.enable = true;
